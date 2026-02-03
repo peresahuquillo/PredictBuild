@@ -1,2 +1,2 @@
 # PredictBuild
-Control de versions dels Notebooks i arxius relacionats amb PredictBuild
+Despliegue modelosde Machine Learning  a servidor.
