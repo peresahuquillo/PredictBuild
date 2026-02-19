@@ -10,10 +10,10 @@ app = FastAPI()
 # ===== CONFIGURACIÓN DE BASE DE DATOS =====
 # Cambia estos valores por los de tu BD
 DB_CONFIG = {
-    "host": "xxx",  # o la URL que tengas
-    "database": "xxx",
-    "user": "xxx",
-    "password": "xxx",
+    "host": "aws-1-eu-west-1.pooler.supabase.com",  # o la URL que tengas
+    "database": "postgres",
+    "user": "postgres.txgjclpciwmivttxvkoy",
+    "password": "2@Vmhyr_UmC9*NLQKVbUM6u.N.mYfgyn",
     "port": 5432
 }
 
