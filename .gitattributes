@@ -1,3 +1,4 @@
-# Nunca tratar pickles como texto
+# Nunca tratar pickles como texto, tratarlos como Binario
 *.pkl binary
 *.pkl -text
+
