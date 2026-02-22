@@ -19,9 +19,12 @@ DB_CONFIG = {
 
 # ===== CARGAR MODELOS =====
 modelos = {}
-# Carga todos los modelos al arrancar
 for i in range(1, 13):
-    with open(f"modelo_{i}.pkl", "rb") as f:
+    path = f"modelo_{i}.pkl"
+    with open(path, "rb") as f:
+        head = f.read(32)
+        print(f"[DEBUG] {path} first32={head}")
+        f.seek(0)
         modelos[f"modelo_{i}"] = pickle.load(f)
 
 # ===== CARGAR DICCIONARIOS DESDE BD =====
