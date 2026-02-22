@@ -13,19 +13,41 @@ DB_CONFIG = {
     "host": os.getenv("DB_HOST", "aws-0-eu-west-1.pooler.supabase.com"),
     "database": os.getenv("DB_NAME", "postgres"),
     "user": os.getenv("DB_USER", "postgres.txgjclpciwmivttxvkoy"),
-    "password": os.getenv("DB_PASSWORD", "2@Vmhyr_UmC9*NLQKVbUM6u.N.mYfgyn"),
+    "password": os.getenv("DB_PASSWORD"),  # <- sin default
     "port": int(os.getenv("DB_PORT", 5432))
 }
 
-# ===== CARGAR MODELOS =====
 modelos = {}
-for i in range(1, 13):
-    path = f"modelo_{i}.pkl"
-    with open(path, "rb") as f:
-        head = f.read(32)
-        print(f"[DEBUG] {path} first32={head}")
-        f.seek(0)  # <-- CRÍTICO
-        modelos[f"modelo_{i}"] = pickle.load(f)
+diccionarios = None
+startup_error = None
+
+@app.on_event("startup")
+def startup():
+    global modelos, diccionarios, startup_error
+    try:
+        if not DB_CONFIG["password"]:
+            raise RuntimeError("DB_PASSWORD no está configurada en Render (Environment Variables).")
+        
+        # 1) Cargar modelos
+        for i in range(1, 13):
+            path = f"modelo_{i}.pkl"
+            with open(path, "rb") as f:
+                head = f.read(32)
+                print(f"[DEBUG] {path} first32={head}")
+                f.seek(0)  # <-- IMPORTANTE (por el debug)
+                modelos[f"modelo_{i}"] = pickle.load(f)
+
+        # 2) Cargar diccionarios desde BD
+        print("Cargando diccionarios desde BD...")
+        diccionarios = cargar_diccionarios()
+        print("Diccionarios cargados correctamente")
+
+    except Exception:
+        import traceback
+        startup_error = traceback.format_exc()
+        print("[STARTUP ERROR]")
+        print(startup_error)
+
 
 # ===== CARGAR DICCIONARIOS DESDE BD =====
 def cargar_diccionarios():
@@ -62,10 +84,7 @@ def cargar_diccionarios():
         'mapeo_modelos': mapeo_modelos
     }
 
-# Cargar diccionarios al iniciar el servidor
-print("Cargando diccionarios desde BD...")
-diccionarios = cargar_diccionarios()
-print("Diccionarios cargados correctamente")
+
 
 # ===== MODELO DE DATOS DE ENTRADA =====
 class ViviendaInput(BaseModel):
@@ -87,6 +106,12 @@ class ViviendaInput(BaseModel):
 # ===== ENDPOINT DE PREDICCIÓN =====
 @app.post("/predecir")
 def predecir_valor(vivienda: ViviendaInput):
+    if startup_error is not None:
+        raise HTTPException(status_code=500, detail=f"Startup failed: {startup_error[:300]}")
+
+    if diccionarios is None or not modelos:
+        raise HTTPException(status_code=503, detail="Servicio no listo: modelos/diccionarios no cargados todavía")
+
     try:
         # 1. Seleccionar el modelo según el distrito
         distrito = vivienda.distrito
@@ -169,12 +194,22 @@ def predecir_valor(vivienda: ViviendaInput):
 # ===== ENDPOINT PARA REFRESCAR DICCIONARIOS =====
 @app.post("/refrescar-diccionarios")
 def refrescar():
-    """Endpoint para recargar los diccionarios sin reiniciar el servidor"""
-    global diccionarios
-    diccionarios = cargar_diccionarios()
-    return {"mensaje": "Diccionarios actualizados correctamente"}
+    global diccionarios, startup_error
+    try:
+        diccionarios = cargar_diccionarios()
+        startup_error = None
+        return {"mensaje": "Diccionarios actualizados correctamente"}
+    except Exception as e:
+        import traceback
+        startup_error = traceback.format_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ===== ENDPOINT DE HEALTH CHECK =====
 @app.get("/")
 def health_check():
-    return {"status": "ok", "modelos_cargados": len(modelos)}
+    return {
+        "status": "ok" if startup_error is None else "degraded",
+        "modelos_cargados": len(modelos),
+        "diccionarios_cargados": diccionarios is not None,
+        "startup_error": startup_error[:800] if startup_error else None
+    }
