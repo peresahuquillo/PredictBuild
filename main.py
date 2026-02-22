@@ -24,7 +24,7 @@ for i in range(1, 13):
     with open(path, "rb") as f:
         head = f.read(32)
         print(f"[DEBUG] {path} first32={head}")
-        f.seek(0)
+        f.seek(0)  # <-- CRÍTICO
         modelos[f"modelo_{i}"] = pickle.load(f)
 
 # ===== CARGAR DICCIONARIOS DESDE BD =====
