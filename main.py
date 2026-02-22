@@ -28,14 +28,18 @@ def startup():
         if not DB_CONFIG["password"]:
             raise RuntimeError("DB_PASSWORD no está configurada en Render (Environment Variables).")
         
-        # 1) Cargar modelos
+        # 1) Cargar modelos        
         for i in range(1, 13):
             path = f"modelo_{i}.pkl"
-            with open(path, "rb") as f:
-                head = f.read(32)
-                print(f"[DEBUG] {path} first32={head}")
-                f.seek(0)  # <-- IMPORTANTE (por el debug)
-                modelos[f"modelo_{i}"] = pickle.load(f)
+            try:
+                with open(path, "rb") as f:
+                    head = f.read(64)
+                    print(f"[STARTUP] Loading {path} size={os.path.getsize(path)} head64={head!r}")
+                    f.seek(0)
+                    modelos[f"modelo_{i}"] = pickle.load(f)
+                    print(f"[STARTUP] OK {path}")
+            except Exception as e:
+                raise RuntimeError(f"Fallo cargando {path}: {e}")
 
         # 2) Cargar diccionarios desde BD
         print("Cargando diccionarios desde BD...")
