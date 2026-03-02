@@ -57,7 +57,7 @@ def cargar_diccionarios():
     conn = psycopg2.connect(**DB_CONFIG)
     
     # Diccionario de tipo de vivienda
-    tipos_df = pd.read_sql('SELECT tipo_vivienda, index FROM "LU_Tipo_Vivienda"', conn)
+    tipos_df = pd.read_sql('SELECT tipo_vivienda, index FROM core."LU_Tipo_Vivienda"', conn)
     tipos_vivienda = dict(zip(tipos_df['tipo_vivienda'], tipos_df['index']))
     
     # Diccionario de estado de obra
