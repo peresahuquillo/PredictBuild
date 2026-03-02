@@ -27,15 +27,15 @@ def startup():
     try:
         if not DB_CONFIG["password"]:
             raise RuntimeError("DB_PASSWORD no está configurada en Render (Environment Variables).")
-        
-        # 1) Cargar modelos        
+
+        # 1) Cargar modelos
         for i in range(1, 13):
-            path = f"modelo_{i}.pkl"
+            path = f"modelo_{i}.pkl"  
             try:
-                with open(path, "rb") as f:
-                    print(f"[STARTUP] Loading {path} size={os.path.getsize(path)} head64={head!r}")
-                    modelos[f"modelo_{i}"] = joblib.load(path)
-                    print(f"[STARTUP] OK {path}")
+                size = os.path.getsize(path)
+                print(f"[STARTUP] Loading {path} size={size}")
+                modelos[f"modelo_{i}"] = joblib.load(path)
+                print(f"[STARTUP] OK {path}")
             except Exception as e:
                 raise RuntimeError(f"Fallo cargando {path}: {e}")
 
