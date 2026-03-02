@@ -213,5 +213,5 @@ def health_check():
         "status": "ok" if startup_error is None else "degraded",
         "modelos_cargados": len(modelos),
         "diccionarios_cargados": diccionarios is not None,
-        "startup_error": startup_error[:800] if startup_error else None
+        "startup_error": startup_error if startup_error else None
     }
