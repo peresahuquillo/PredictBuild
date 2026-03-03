@@ -117,15 +117,24 @@ def predecir_valor(vivienda: ViviendaInput):
     try:
         # 1. Seleccionar el modelo según el distrito
         distrito = vivienda.distrito
-        nombre_modelo = diccionarios['mapeo_modelos'].get(distrito)
+        nombre_modelo = diccionarios["mapeo_modelos"].get(distrito)
         
         if not nombre_modelo:
-            raise HTTPException(status_code=400, detail=f"No hay modelo disponible para el distrito {distrito}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"No hay modelo disponible para el distrito {distrito}"
+            )
         
-        modelo = modelos.get(nombre_modelo)
+        # En la BD viene como "modelo_6.pkl" -> lo normalizamos a "modelo_6"
+        nombre_modelo_key = os.path.splitext(nombre_modelo)[0]
+        
+        modelo = modelos.get(nombre_modelo_key)
         if not modelo:
-            raise HTTPException(status_code=500, detail=f"Modelo {nombre_modelo} no encontrado")
-        
+            raise HTTPException(
+                status_code=500,
+                detail=f"Modelo {nombre_modelo} no encontrado (key={nombre_modelo_key})"
+            )
+            
         # 2. Mapear valores categóricos a numéricos
         distrito_valor = diccionarios['distrito_valores'].get(distrito, 0)
         tipo_vivienda_valor = diccionarios['tipos_vivienda'].get(vivienda.tipo_vivienda, 0)
