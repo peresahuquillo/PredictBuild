@@ -38,7 +38,9 @@ def startup():
                 print(f"[STARTUP] OK {path}")
             except Exception as e:
                 raise RuntimeError(f"Fallo cargando {path}: {e}")
-
+        print("[DEBUG] modelo_1 n_features_in_:", modelos["modelo_1"].n_features_in_)
+        print("[DEBUG] feature_names_in_:", getattr(modelos["modelo_1"], "feature_names_in_", None))
+        
         # 2) Cargar diccionarios desde BD
         print("Cargando diccionarios desde BD...")
         diccionarios = cargar_diccionarios()
