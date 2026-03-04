@@ -169,7 +169,6 @@ def predecir_valor(vivienda: ViviendaInput):
         
         # 4. Preparar los datos en el orden correcto
         entrada = [[
-            distrito_valor,
             vivienda.metros_cuadrados,
             precio_m2_distrito,
             precio_m2_barrio,
