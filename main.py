@@ -59,22 +59,22 @@ def cargar_diccionarios():
     conn = psycopg2.connect(**DB_CONFIG)
     
     # Diccionario de tipo de vivienda
-    tipos_df = pd.read_sql('SELECT tipo_vivienda, index FROM core."LU_Tipo_Vivienda"', conn)
+    tipos_df = pd.read_sql('SELECT tipo_vivienda, index FROM core."lu_tipo_vivienda"', conn)
     tipos_vivienda = dict(zip(tipos_df['tipo_vivienda'], tipos_df['index']))
     
     # Diccionario de estado de obra
-    estados_df = pd.read_sql('SELECT estado, valor FROM core."LU_Estat_Immoble"', conn)
+    estados_df = pd.read_sql('SELECT estado, valor FROM core."lu_estat_immoble"', conn)
     estados_obra = dict(zip(estados_df['estado'], estados_df['valor']))
     
     # Tabla principal con precios
     precios_df = pd.read_sql('''
         SELECT ciudad, distrito, barrio, calle, 
                precio_m2_distrito, precio_m2_barrio, precio_m2_calle
-        FROM core."LU_Preu_m2_Districte_Barri_Carrer"
+        FROM core."lu_preu_m2_districte_barri_carrer"
     ''', conn)
     
     # Mapeo distrito -> modelo y distrito -> grupo (distrito_valor)
-    mapeo_df = pd.read_sql('SELECT grupo, ciudad, distrito, modelo FROM core."LU_Modelos_Distrito"', conn)
+    mapeo_df = pd.read_sql('SELECT grupo, ciudad, distrito, modelo FROM core."lu_modelos_distrito"', conn)
     mapeo_modelos = dict(zip(mapeo_df['distrito'], mapeo_df['modelo']))
     distrito_valores = dict(zip(mapeo_df['distrito'], mapeo_df['grupo']))
     
