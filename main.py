@@ -5,6 +5,8 @@ from pydantic import BaseModel
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import os
+import logging
+import traceback
 
 app = FastAPI()
 
@@ -198,12 +200,15 @@ def predecir_valor(vivienda: ViviendaInput):
             "modelo_usado": nombre_modelo
         }
         
+    
     except HTTPException:
         raise
     except Exception as e:
+        logging.error(f"Error en /predecir: {str(e)}")
+        logging.error(traceback.format_exc())  # <-- esto imprime el traceback completo
         raise HTTPException(status_code=500, detail=f"Error en la predicción: {str(e)}")
-
-# ===== ENDPOINT PARA REFRESCAR DICCIONARIOS =====
+    
+    # ===== ENDPOINT PARA REFRESCAR DICCIONARIOS =====
 @app.post("/refrescar-diccionarios")
 def refrescar():
     global diccionarios, startup_error
